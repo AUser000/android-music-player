@@ -4,11 +4,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,11 +28,11 @@ import static android.os.Environment.getRootDirectory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btn, playBtn ;
+    private Button btn, playBtn, stopBtn ;
     SQLiteDatabase database;
     MediaPlayer player;
-    TextView textView;
     DBHelper dbHelper;
+    ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 database = dbHelper.getWritableDatabase();
 
                 SongDb.getSongsToDb(fileDirDv, database);
-                //SongDb.getSongsToDb(fileDirSd, database);
+                SongDb.getSongsToDb(fileDirSd, database);
                 database.close();
                 long time2 = timestamp.getTime();
                 Toast.makeText(MainActivity.this, "run ", Toast.LENGTH_SHORT).show();
@@ -63,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         playBtn = (Button) findViewById(R.id.plyBtn);
-        textView = (TextView) findViewById(R.id.textView);
         playBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -78,22 +79,34 @@ public class MainActivity extends AppCompatActivity {
                     path = cursor.getString(cursor.getColumnIndex("PATH"));
                     name = cursor.getString(cursor.getColumnIndex("NAME"));
                 }
-                textView.setText(path);
-                File newfile = new File(path);
-
                 try {
-                    player.setDataSource(path);
-                    player.prepare();
+                    if ( player != null && player.isPlaying()) {
+                        player.stop();
+                    }
+                    player = MediaPlayer.create(MainActivity.this,  Uri.parse(path));
                     player.start();
 
                 } catch (Exception e) {
-                    Toast.makeText(MainActivity.this, newfile.getPath() +"\n Error" + e, Toast.LENGTH_SHORT).show();
-                    textView.setText(path + "\n\n" +e);
+                    Toast.makeText(MainActivity.this, " Error" + e, Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
 
             }
         });
+
+
+        stopBtn = (Button) findViewById(R.id.stopBtn);
+        stopBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                player.stop();
+            }
+        });
+
+
+
+        //listView.setAdapter();
+
 
     }
 
