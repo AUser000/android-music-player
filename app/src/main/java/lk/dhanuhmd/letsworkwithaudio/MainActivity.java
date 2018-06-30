@@ -2,45 +2,67 @@ package lk.dhanuhmd.letsworkwithaudio;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import lk.dhanuhmd.letsworkwithaudio.database.DBHelper;
 import lk.dhanuhmd.letsworkwithaudio.database.SongDb;
+import lk.dhanuhmd.letsworkwithaudio.database.Table;
+import lk.dhanuhmd.letsworkwithaudio.model.Genre;
 import lk.dhanuhmd.letsworkwithaudio.model.Song;
-
-import static android.os.Environment.getExternalStoragePublicDirectory;
-import static android.os.Environment.getRootDirectory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btn, playBtn, stopBtn ;
+    private Button refrshBtn, playBtn, stopBtn ;
     SQLiteDatabase database;
     MediaPlayer player;
     DBHelper dbHelper;
     ListView listView;
+    ArrayList<Song> songsList;
+    ArrayList<String> arrayNameList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         dbHelper = new DBHelper(MainActivity.this);
-        btn = (Button) findViewById(R.id.refreshBtn);
-        btn.setOnClickListener(new View.OnClickListener() {
+        songsList = new ArrayList<>();
+        arrayNameList = new ArrayList<>();
+        listView = (ListView) findViewById(R.id.listView);
+
+        try {
+            database = dbHelper.getReadableDatabase();
+            Cursor cursor = database.rawQuery("SELECT * FROM MUSIC", null);
+            while (cursor.moveToNext()) {
+                Song temp = new Song();
+                temp.setSongName(cursor.getString(cursor.getColumnIndex("NAME")));
+                temp.setSongPath(cursor.getString(cursor.getColumnIndex("PATH")));
+                temp.setGenre(Genre.OTHER);
+                temp.setArtist("");
+                temp.setAlbum("");
+                songsList.add(temp);
+                arrayNameList.add(cursor.getString(cursor.getColumnIndex("NAME")));
+            }
+            Toast.makeText(MainActivity.this, "run ", Toast.LENGTH_SHORT).show();
+            ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_activated_1, arrayNameList );
+            listView.setAdapter(adapter);
+        } catch (Exception e) {
+            Toast.makeText(MainActivity.this, ""+e , Toast.LENGTH_SHORT).show();
+        }
+
+        refrshBtn = (Button) findViewById(R.id.refreshBtn);
+        refrshBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -53,8 +75,8 @@ public class MainActivity extends AppCompatActivity {
                 String extStoreDv = System.getenv("EXTERNAL_STORAGE");
                 File fileDirDv = new File(extStoreDv);
 
-
                 database = dbHelper.getWritableDatabase();
+                database.delete(Table.TABLE, null, null);
 
                 SongDb.getSongsToDb(fileDirDv, database);
                 SongDb.getSongsToDb(fileDirSd, database);
@@ -83,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
                     if ( player != null && player.isPlaying()) {
                         player.stop();
                     }
-                    player = MediaPlayer.create(MainActivity.this,  Uri.parse(path));
+                    player = MediaPlayer.create(MainActivity.this, /* Uri.parse(path)*/ R.raw.neked);
                     player.start();
 
                 } catch (Exception e) {
@@ -103,13 +125,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-        //listView.setAdapter();
-
-
     }
-
-
-
 }

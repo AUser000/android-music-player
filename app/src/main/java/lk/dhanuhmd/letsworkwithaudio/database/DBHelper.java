@@ -12,7 +12,7 @@ import static android.os.Environment.getExternalStorageDirectory;
 import static android.os.Environment.*;
 
 /**
- * Created by Acer on 25/06/2018.
+ * Created by Dhanushka Dharmasena on 25/06/2018.
  */
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -29,6 +29,7 @@ public class DBHelper extends SQLiteOpenHelper {
 //        sqLiteDatabase.execSQL(Table.QUERY_DELETE);
 //        return super.getWritableDatabase();
 //    }
+
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {

@@ -1,12 +1,12 @@
 package lk.dhanuhmd.letsworkwithaudio.database;
 
 /**
- * Created by Acer on 25/06/2018.
+ * Created by Dhanushka Dharmasena on 25/06/2018.
  */
 
 public class Table {
     //table name
-    public static final String TABLE = "table";
+    public static final String TABLE = "MUSIC";
     //table columns
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_PATH = "path";
@@ -17,5 +17,4 @@ public class Table {
     public static final String QUERY_CREATE = "CREATE TABLE MUSIC (NAME TEXT, PATH TEXT, GENRE TEXT, ALBUM TEXT, ARTIST TEXT)";
     public static final String QUERY_DELETE =
             "DROP TABLE '" + TABLE +"'";
-
 }

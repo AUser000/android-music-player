@@ -1,7 +1,7 @@
 package lk.dhanuhmd.letsworkwithaudio.model;
 
 /**
- * Created by Acer on 25/06/2018.
+ * Created by Dhanushka Dharmasena on 25/06/2018.
  */
 
 public class Song {
@@ -10,6 +10,8 @@ public class Song {
     private String artist;
     private String album;
     private Genre genre;
+
+    public Song() {}
 
     public Song(String songName, String songPath, String artist, String album, Genre genre) {
         this.songName = songName;

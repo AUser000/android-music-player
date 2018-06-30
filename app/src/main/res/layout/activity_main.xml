@@ -61,8 +61,10 @@
         android:layout_height="445dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
 </android.support.constraint.ConstraintLayout>
