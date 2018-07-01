@@ -55,6 +55,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         swipeLayout.setColorScheme(android.R.color.holo_red_light);
 
         try {
+            if (android.os.Build.VERSION.SDK_INT > 23) {
+                if(!permissionGranted) {
+                    checkPermission();
+                    return;
+                }
+            }
             database = dbHelper.getReadableDatabase();
             Cursor cursor = database.rawQuery("SELECT * FROM MUSIC", null);
             while (cursor.moveToNext()) {
@@ -96,6 +102,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 if ( player != null && player.isPlaying()) {
                     player.stop();
                 }
+                if (android.os.Build.VERSION.SDK_INT > 23) {
+                    if(!permissionGranted) {
+                        checkPermission();
+                        return;
+                    }
+                }
                 player = MediaPlayer.create(MainActivity.this, /* Uri.parse(path)*/ R.raw.neked);
                 player.start();
             }
@@ -117,9 +129,14 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public void onRefresh() {
         new Handler().postDelayed(new Runnable() {
             @Override public void run() {
-
+                if (android.os.Build.VERSION.SDK_INT > 23) {
+                    if(!permissionGranted) {
+                        checkPermission();
+                        return;
+                    }
+                }
                 String extStoreSd = System.getenv("SECONDARY_STORAGE");
-                File fileDirSd = new File(extStoreSd);
+                //File fileDirSd = new File(extStoreSd);
                 //File dir for internal storage(programmatically external)
                 String extStoreDv = System.getenv("EXTERNAL_STORAGE");
                 File fileDirDv = new File(extStoreDv);
@@ -128,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 database.delete(Table.TABLE, null, null);
 
                 SongDb.getSongsToDb(fileDirDv, database);
-                SongDb.getSongsToDb(fileDirSd, database);
+                //SongDb.getSongsToDb(fileDirSd, database);
                 database.close();
 
                 try {
