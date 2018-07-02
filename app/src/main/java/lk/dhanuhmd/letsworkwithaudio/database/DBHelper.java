@@ -21,8 +21,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final int DB_VERSION = 1;
 
     public DBHelper(Context context) {
-        super(context, getExternalStorageDirectory()
-                + File.separator+"Music Player"+ File.separator+ DB_NAME, null, DB_VERSION);
+        super(context, context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS) + File.separator+ DB_NAME, null, DB_VERSION);
     }
 
 //    public SQLiteDatabase getWritableDatabase(SQLiteDatabase sqLiteDatabase) {

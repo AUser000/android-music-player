@@ -58,7 +58,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             if (android.os.Build.VERSION.SDK_INT > 23) {
                 if(!permissionGranted) {
                     checkPermission();
-                    return;
+                    if(!permissionGranted) {
+                        return;
+                    }
                 }
             }
             database = dbHelper.getReadableDatabase();
@@ -105,7 +107,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 if (android.os.Build.VERSION.SDK_INT > 23) {
                     if(!permissionGranted) {
                         checkPermission();
-                        return;
+                        if(!permissionGranted) {
+                            return;
+                        }
                     }
                 }
                 player = MediaPlayer.create(MainActivity.this, /* Uri.parse(path)*/ R.raw.neked);
@@ -132,10 +136,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 if (android.os.Build.VERSION.SDK_INT > 23) {
                     if(!permissionGranted) {
                         checkPermission();
-                        return;
+                        if(!permissionGranted) {
+                            swipeLayout.setRefreshing(false);
+                            return;
+                        }
                     }
                 }
-                String extStoreSd = System.getenv("SECONDARY_STORAGE");
+                //String extStoreSd = System.getenv("SECONDARY_STORAGE");
                 //File fileDirSd = new File(extStoreSd);
                 //File dir for internal storage(programmatically external)
                 String extStoreDv = System.getenv("EXTERNAL_STORAGE");
@@ -147,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 SongDb.getSongsToDb(fileDirDv, database);
                 //SongDb.getSongsToDb(fileDirSd, database);
                 database.close();
-
+                Toast.makeText(MainActivity.this, "fuck", Toast.LENGTH_SHORT).show();
                 try {
                     database = dbHelper.getReadableDatabase();
                     Cursor cursor = database.rawQuery("SELECT * FROM MUSIC", null);
@@ -163,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     }
                     ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_activated_1, arrayNameList );
                     listView.setAdapter(adapter);
+                    Toast.makeText(MainActivity.this, "fuck", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     Toast.makeText(MainActivity.this, ""+e , Toast.LENGTH_SHORT).show();
                 }
