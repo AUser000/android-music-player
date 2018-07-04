@@ -2,6 +2,7 @@ package lk.dhanuhmd.letsworkwithaudio;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.MediaPlayer;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean permissionGranted;
     private static final int REQUEST_PERMISSION_WRITE = 101;///
     SwipeRefreshLayout swipeLayout;
+    public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
+    Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         arrayNameList = new ArrayList<>();
         listView = (ListView) findViewById(R.id.listView);
         playButton = (ImageButton) findViewById(R.id.plyBtn);
+        forwordButton = (ImageButton) findViewById(R.id.fowordBtn);
+
 
         if (android.os.Build.VERSION.SDK_INT > 23) {
             if(!permissionGranted) {
@@ -58,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         ContentResolver contentResolver = getContentResolver();
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
-        String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
+        String sortOrder = MediaStore.Audio.Media.ALBUM + " ASC";
         Cursor cur = contentResolver.query(uri, null, selection, null, sortOrder);
         int count = 0;
         if(cur != null) {
@@ -78,45 +83,40 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String entry= (String) parent.getAdapter().getItem(position);
-                if ( player != null && player.isPlaying()) {
-                    player.stop();
+                if(serviceIntent == null) {
+                    serviceIntent = new Intent(MainActivity.this, PlayService.class);
+
+                    serviceIntent.putExtra(EXTRA_MESSAGE, entry);
+                    startService(serviceIntent);
+                    playButton.setImageResource(R.drawable.ic_action_name);
+                } else {
+                    stopService(serviceIntent);
+                    serviceIntent = new Intent(MainActivity.this, PlayService.class);
+
+                    serviceIntent.putExtra(EXTRA_MESSAGE, entry);
+                    startService(serviceIntent);
+                    playButton.setImageResource(R.drawable.ic_action_name);
                 }
-                if (android.os.Build.VERSION.SDK_INT > 23) {
-                    if(!permissionGranted) {
-                        checkPermission();
-                        if(!permissionGranted) {
-                            return;
-                        }
-                    }
-                }
-                player = MediaPlayer.create(MainActivity.this, Uri.parse(entry));
-                player.start();
-                playButton.setImageResource(R.drawable.ic_action_name);
+
+
             }
         });
 
-//        pauseBtn = (Button) findViewById(R.id.pauseBtn);
-//        pauseBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if(player != null && player.isPlaying() ) {
-//                    player.pause();
-//                    pauseBtn.setText("RESUM");
-//                } else if (player != null && !player.isPlaying()) {
-//                    int length = player.getCurrentPosition();
-//                    player.seekTo(length);
-//                    player.start();
-//                    pauseBtn.setText("PAUSE");
-//                }
-//            }
-//        }); @android:drawable/ic_media_next
+        forwordButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "clicked button ", Toast.LENGTH_SHORT).show();
+                Intent serviceIntent = new Intent(MainActivity.this, PlayService.class);
 
+                startService(serviceIntent);
+            }
+        });
 
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(player != null) {
-                    player.stop();
+                if(serviceIntent != null) {
+                    stopService(serviceIntent);
                     playButton.setImageResource(R.drawable.ic_play);
                 }
             }
