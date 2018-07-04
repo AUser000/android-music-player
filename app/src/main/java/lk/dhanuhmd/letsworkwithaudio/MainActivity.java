@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -26,9 +27,10 @@ import java.util.ArrayList;
 
 import lk.dhanuhmd.letsworkwithaudio.model.Song;
 
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends AppCompatActivity {
 
     private Button pauseBtn,stopBtn ;
+    ImageButton playButton, forwordButton, backwordButton;
     MediaPlayer player;
     ListView listView;
     ArrayList<Song> songsList;
@@ -45,41 +47,32 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         songsList = new ArrayList<>();
         arrayNameList = new ArrayList<>();
         listView = (ListView) findViewById(R.id.listView);
-        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
-        swipeLayout.setOnRefreshListener(this);
-        swipeLayout.setColorScheme(android.R.color.holo_red_light);
+        playButton = (ImageButton) findViewById(R.id.plyBtn);
+
         if (android.os.Build.VERSION.SDK_INT > 23) {
             if(!permissionGranted) {
                 checkPermission();
-                if(!permissionGranted) {
-                    return;
-                }
             }
         }
 
-        new Thread(new Runnable() {
-            public void run() {
-                    ContentResolver contentResolver = getContentResolver();
-                    Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                    String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
-                    String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
-                    Cursor cur = contentResolver.query(uri, null, selection, null, sortOrder);
-                    int count = 0;
-                    if(cur != null) {
-                        count = cur.getCount();
-                        if(count > 0) {
-                            while(cur.moveToNext()) {
-                                String data = cur.getString(cur.getColumnIndex(MediaStore.Audio.Media.DATA));
-                                arrayNameList.add(data);
-                            }
-
-                        }
-                    }
-                    cur.close();
-                    ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_activated_1, arrayNameList );
-                    listView.setAdapter(adapter);
+        ContentResolver contentResolver = getContentResolver();
+        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
+        String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
+        Cursor cur = contentResolver.query(uri, null, selection, null, sortOrder);
+        int count = 0;
+        if(cur != null) {
+            count = cur.getCount();
+            if(count > 0) {
+                while(cur.moveToNext()) {
+                    String data = cur.getString(cur.getColumnIndex(MediaStore.Audio.Media.DATA));
+                    arrayNameList.add(data);
+                }
             }
-        }).start();
+        }
+        cur.close();
+        ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_activated_1, arrayNameList );
+        listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -98,74 +91,40 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 }
                 player = MediaPlayer.create(MainActivity.this, Uri.parse(entry));
                 player.start();
+                playButton.setImageResource(R.drawable.ic_action_name);
             }
         });
 
-        pauseBtn = (Button) findViewById(R.id.pauseBtn);
-        pauseBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(player != null && player.isPlaying() ) {
-                    player.pause();
-                    pauseBtn.setText("RESUM");
-                } else if (player != null && !player.isPlaying()) {
-                    int length = player.getCurrentPosition();
-                    player.seekTo(length);
-                    player.start();
-                    pauseBtn.setText("PAUSE");
-                }
-            }
-        });
+//        pauseBtn = (Button) findViewById(R.id.pauseBtn);
+//        pauseBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(player != null && player.isPlaying() ) {
+//                    player.pause();
+//                    pauseBtn.setText("RESUM");
+//                } else if (player != null && !player.isPlaying()) {
+//                    int length = player.getCurrentPosition();
+//                    player.seekTo(length);
+//                    player.start();
+//                    pauseBtn.setText("PAUSE");
+//                }
+//            }
+//        }); @android:drawable/ic_media_next
 
-        stopBtn = (Button) findViewById(R.id.stopBtn);
-        stopBtn.setOnClickListener(new View.OnClickListener() {
+
+        playButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 if(player != null) {
                     player.stop();
+                    playButton.setImageResource(R.drawable.ic_play);
                 }
             }
         });
 
+
     }
 
-
-    @Override
-    public void onRefresh() {
-        new Handler().postDelayed(new Runnable() {
-            @Override public void run() {
-                if (android.os.Build.VERSION.SDK_INT > 23) {
-                    if(!permissionGranted) {
-                        checkPermission();
-                        if(!permissionGranted) {
-                            swipeLayout.setRefreshing(false);
-                            return;
-                        }
-                    }
-                }
-                ContentResolver contentResolver = getContentResolver();
-                Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
-                String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
-                Cursor cur = contentResolver.query(uri, null, selection, null, sortOrder);
-                int count = 0;
-                arrayNameList = new ArrayList<>();
-                if(cur != null) {
-                    count = cur.getCount();
-                    if(count > 0) {
-                        while(cur.moveToNext()) {
-                            String data = cur.getString(cur.getColumnIndex(MediaStore.Audio.Media.DATA));
-                            arrayNameList.add(data);
-                        }
-                    }
-                }
-                cur.close();
-                ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_activated_1, arrayNameList );
-                listView.setAdapter(adapter);
-                swipeLayout.setRefreshing(false);
-            }
-        }, 500);
-    }
 
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
