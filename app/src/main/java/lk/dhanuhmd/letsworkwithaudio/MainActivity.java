@@ -1,6 +1,9 @@
 package lk.dhanuhmd.letsworkwithaudio;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,6 +16,7 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -53,6 +57,13 @@ public class MainActivity extends AppCompatActivity {
         playButton = (ImageButton) findViewById(R.id.plyBtn);
         forwordButton = (ImageButton) findViewById(R.id.fowordBtn);
 
+        final Intent intent = new Intent();
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_play)
+                .setContentTitle("Hello notification")
+                .setContentText("content of notification")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         if (android.os.Build.VERSION.SDK_INT > 23) {
             if(!permissionGranted) {
@@ -85,8 +96,9 @@ public class MainActivity extends AppCompatActivity {
                 String entry= (String) parent.getAdapter().getItem(position);
                 if(serviceIntent == null) {
                     serviceIntent = new Intent(MainActivity.this, PlayService.class);
-
                     serviceIntent.putExtra(EXTRA_MESSAGE, entry);
+
+
                     startService(serviceIntent);
                     playButton.setImageResource(R.drawable.ic_action_name);
                 } else {
@@ -98,6 +110,17 @@ public class MainActivity extends AppCompatActivity {
                     playButton.setImageResource(R.drawable.ic_action_name);
                 }
 
+                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, serviceIntent, 0);
+                Notification notification = new Notification.Builder(MainActivity.this)
+                        .setTicker(entry)
+                        .setContentTitle("Playing Now")
+                        .setContentText(entry)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentIntent(pendingIntent).getNotification();
+
+                notification.flags = Notification.FLAG_AUTO_CANCEL;
+                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                notificationManager.notify(0, notification);
 
             }
         });
@@ -105,10 +128,18 @@ public class MainActivity extends AppCompatActivity {
         forwordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "clicked button ", Toast.LENGTH_SHORT).show();
-                Intent serviceIntent = new Intent(MainActivity.this, PlayService.class);
+                Intent intent1 = new Intent();
+                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent1, 0);
+                Notification notification = new Notification.Builder(MainActivity.this)
+                        .setTicker("Tiker TITLe")
+                        .setContentTitle("df")
+                        .setContentText("fuck")
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentIntent(pendingIntent).getNotification();
 
-                startService(serviceIntent);
+                notification.flags = Notification.FLAG_AUTO_CANCEL;
+                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                notificationManager.notify(0, notification);
             }
         });
 
