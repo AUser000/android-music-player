@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
                 String entry= (String) parent.getAdapter().getItem(position);
                 if(serviceIntent == null) {
                     serviceIntent = new Intent(MainActivity.this, PlayService.class);
+
                     serviceIntent.putExtra(EXTRA_MESSAGE, entry);
 
 
@@ -110,17 +111,6 @@ public class MainActivity extends AppCompatActivity {
                     playButton.setImageResource(R.drawable.ic_action_name);
                 }
 
-                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, serviceIntent, 0);
-                Notification notification = new Notification.Builder(MainActivity.this)
-                        .setTicker(entry)
-                        .setContentTitle("Playing Now")
-                        .setContentText(entry)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentIntent(pendingIntent).getNotification();
-
-                notification.flags = Notification.FLAG_AUTO_CANCEL;
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                notificationManager.notify(0, notification);
 
             }
         });
