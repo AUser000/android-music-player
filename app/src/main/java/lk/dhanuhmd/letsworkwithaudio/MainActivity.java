@@ -4,8 +4,11 @@ import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.MediaPlayer;
@@ -13,6 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -45,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     SwipeRefreshLayout swipeLayout;
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
     Intent serviceIntent;
+    private boolean isBound = false;
+    MyService myService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,19 +63,13 @@ public class MainActivity extends AppCompatActivity {
         playButton = (ImageButton) findViewById(R.id.plyBtn);
         forwordButton = (ImageButton) findViewById(R.id.fowordBtn);
 
-        final Intent intent = new Intent();
-
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_play)
-                .setContentTitle("Hello notification")
-                .setContentText("content of notification")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         if (android.os.Build.VERSION.SDK_INT > 23) {
             if(!permissionGranted) {
                 checkPermission();
             }
         }
+
 
         ContentResolver contentResolver = getContentResolver();
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
@@ -87,51 +87,44 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         cur.close();
-        ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_activated_1, arrayNameList );
+        ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, arrayNameList );
         listView.setAdapter(adapter);
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String entry= (String) parent.getAdapter().getItem(position);
-                if(serviceIntent == null) {
-                    serviceIntent = new Intent(MainActivity.this, PlayService.class);
-
-                    serviceIntent.putExtra(EXTRA_MESSAGE, entry);
-
-
-                    startService(serviceIntent);
-                    playButton.setImageResource(R.drawable.ic_action_name);
-                } else {
-                    stopService(serviceIntent);
-                    serviceIntent = new Intent(MainActivity.this, PlayService.class);
-
-                    serviceIntent.putExtra(EXTRA_MESSAGE, entry);
-                    startService(serviceIntent);
-                    playButton.setImageResource(R.drawable.ic_action_name);
+                if(isBound && !myService.isPlayerPlaying() ) {
+                    myService.stopMusic();
+                    myService.doPlayerNull();
+                    myService.playMusic(entry);
+                } else if (isBound && !myService.isPlayerPlaying()) {
+                    myService.stopMusic();
+                    myService.doPlayerNull();
+                    myService.playMusic(entry);
+                    Toast.makeText(MainActivity.this, "still fine", Toast.LENGTH_SHORT).show();
                 }
-
-
             }
         });
 
-        forwordButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent1 = new Intent();
-                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent1, 0);
-                Notification notification = new Notification.Builder(MainActivity.this)
-                        .setTicker("Tiker TITLe")
-                        .setContentTitle("df")
-                        .setContentText("fuck")
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentIntent(pendingIntent).getNotification();
 
-                notification.flags = Notification.FLAG_AUTO_CANCEL;
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                notificationManager.notify(0, notification);
-            }
-        });
+
+//        forwordButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent1 = new Intent();
+//                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent1, 0);
+//                Notification notification = new Notification.Builder(MainActivity.this)
+//                        .setTicker("Tiker TITLe")
+//                        .setContentTitle("df")
+//                        .setContentText("fuck")
+//                        .setSmallIcon(R.mipmap.ic_launcher)
+//                        .setContentIntent(pendingIntent).getNotification();
+//
+//                notification.flags = Notification.FLAG_AUTO_CANCEL;
+//                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//                notificationManager.notify(0, notification);
+//            }
+//        });  this keep as comment
 
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,6 +139,27 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, MyService.class);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+    }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyService.LocalBinder binder = (MyService.LocalBinder) service;
+            myService = binder.getService();
+            isBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isBound = false;
+        }
+    };
 
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
@@ -185,5 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
+
+
 
 }
