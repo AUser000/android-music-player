@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         ContentResolver contentResolver = getContentResolver();
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
-        String sortOrder = MediaStore.Audio.Media.ALBUM + " ASC";
+        String sortOrder = MediaStore.Audio.Media.ARTIST + " ASC";
         Cursor cur = contentResolver.query(uri, null, selection, null, sortOrder);
         int count = 0;
         if(cur != null) {
@@ -93,11 +93,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String entry= (String) parent.getAdapter().getItem(position);
+                startService(new Intent(MainActivity.this, MyService.class));
+                // bind to the service.
+                bindService(new Intent(MainActivity.this,
+                        MyService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+                //bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+
                 if(isBound && !myService.isPlayerPlaying() ) {
-                    myService.stopMusic();
-                    myService.doPlayerNull();
+                    //myService.stopMusic();
+                    //myService.doPlayerNull();
                     myService.playMusic(entry);
-                } else if (isBound && !myService.isPlayerPlaying()) {
+                } else if (isBound && myService.isPlayerPlaying()) {
                     myService.stopMusic();
                     myService.doPlayerNull();
                     myService.playMusic(entry);
@@ -142,8 +148,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Intent intent = new Intent(this, MyService.class);
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
     }
 
