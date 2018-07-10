@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean permissionGranted;
     private static final int REQUEST_PERMISSION_WRITE = 101;///
     SwipeRefreshLayout swipeLayout;
-    public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
+    public static final String ENTRY = "entry";
     Intent serviceIntent;
     private boolean isBound = false;
     MyService myService;
@@ -89,25 +89,27 @@ public class MainActivity extends AppCompatActivity {
         cur.close();
         ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, arrayNameList );
         listView.setAdapter(adapter);
+
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Toast.makeText(MainActivity.this, "still fine", Toast.LENGTH_SHORT).show();
+
                 String entry= (String) parent.getAdapter().getItem(position);
+                //start service
                 startService(new Intent(MainActivity.this, MyService.class));
                 // bind to the service.
-                bindService(new Intent(MainActivity.this,
-                        MyService.class), serviceConnection, Context.BIND_AUTO_CREATE);
-                //bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+                bindService(new Intent(MainActivity.this, MyService.class),
+                        serviceConnection,
+                        Context.BIND_AUTO_CREATE);
 
-                if(isBound && !myService.isPlayerPlaying() ) {
-                    //myService.stopMusic();
-                    //myService.doPlayerNull();
-                    myService.playMusic(entry);
-                } else if (isBound && myService.isPlayerPlaying()) {
+                if (isBound) {
                     myService.stopMusic();
                     myService.doPlayerNull();
                     myService.playMusic(entry);
-                    Toast.makeText(MainActivity.this, "still fine", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "fuck", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -142,7 +144,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        forwordButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+            }
+        });
     }
 
     @Override
@@ -204,6 +211,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+//    public void showNotification() {
+//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+//                .setSmallIcon(R.drawable.notification_icon)
+//                .setContentTitle(textTitle)
+//                .setContentText(textContent)
+//                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+//    }
 
 }
