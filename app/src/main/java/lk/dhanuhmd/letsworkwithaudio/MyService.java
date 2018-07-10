@@ -20,10 +20,12 @@ public class MyService extends Service {
 
     MediaPlayer player = null;
     static final int NOTIFICATION_ID = 543;
-    static final int NOTIFICATION = 1;
 
     public final IBinder iBinder = new LocalBinder();
     private NotificationManager mNM;
+    Intent notificationIntent;
+    PendingIntent pendingIntent;
+    Notification notification;
 
     public class LocalBinder extends Binder {
         MyService getService() {
@@ -73,7 +75,9 @@ public class MyService extends Service {
     public void stopMusic() {
         if(player != null) {
             player.stop();
+            //changeNotificationFlagToClear();
             player = null;
+            stopSelf();
         }
     }
 
@@ -90,16 +94,22 @@ public class MyService extends Service {
     public void doPlayerNull() {
         player = null;
     }
+    public void changeNotificationFlagToClear() {
+        notification.flags = Notification.FLAG_AUTO_CANCEL;
+    }
+
+    public void changeNotificationFlagToC() {
+        notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+    }
 
 
     public void notifyNotification(String songName) {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent = new Intent(this, MainActivity.class);
 
-        
-        PendingIntent pendingIntent =
+        pendingIntent =
                 PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        Notification notification =
+        notification =
                 new Notification.Builder(this)
                         .setContentTitle("Lets work with audio")
                         .setContentText("playing now")
@@ -112,7 +122,10 @@ public class MyService extends Service {
                         .build();
 
 
-        notification.flags = notification.flags | Notification.FLAG_NO_CLEAR;     // NO_CLEAR makes the notification stay when the user performs a "delete all" command
+        notification.flags = notification.flags | Notification.FLAG_NO_CLEAR;
+        // NO_CLEAR makes the notification stay when the user performs a "delete all" command
         startForeground(NOTIFICATION_ID, notification);
     }
+
+
 }

@@ -26,7 +26,8 @@
             android:name=".MyService"
             android:enabled="true"
             android:exported="true"
-            android:launchMode="singleTop"></service>
+            android:launchMode="singleTop" />
+
     </application>
 
 </manifest>

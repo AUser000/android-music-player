@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         arrayNameList = new ArrayList<>();
         listView = (ListView) findViewById(R.id.listView);
         playButton = (ImageButton) findViewById(R.id.plyBtn);
-        forwordButton = (ImageButton) findViewById(R.id.fowordBtn);
+        //forwordButton = (ImageButton) findViewById(R.id.fowordBtn);
 
 
         if (android.os.Build.VERSION.SDK_INT > 23) {
@@ -99,9 +99,11 @@ public class MainActivity extends AppCompatActivity {
 
                 String entry= (String) parent.getAdapter().getItem(position);
                 //start service
-                startService(new Intent(MainActivity.this, MyService.class));
+                serviceIntent = new Intent(MainActivity.this, MyService.class);
+                startService(serviceIntent);
+                Toast.makeText(MainActivity.this, "still fine", Toast.LENGTH_SHORT).show();
                 // bind to the service.
-                bindService(new Intent(MainActivity.this, MyService.class),
+                bindService(serviceIntent,
                         serviceConnection,
                         Context.BIND_AUTO_CREATE);
 
@@ -138,18 +140,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(serviceIntent != null) {
-                    stopService(serviceIntent);
-                    playButton.setImageResource(R.drawable.ic_play);
+
                 }
+                myService.stopMusic();
+                stopService(serviceIntent);
+                playButton.setImageResource(R.drawable.ic_play);
             }
         });
-
-        forwordButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
+//
+//        forwordButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//            }
+//        });
     }
 
     @Override
